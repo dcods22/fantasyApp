@@ -1,0 +1,20 @@
+# use the simple server factory if you only want to run on a single port
+server:
+  rootPath: '/api/*'
+  applicationContextPath: '/'
+  applicationConnectors:
+    - type: http
+      port: 7070
+  adminConnectors:
+    - type: http
+      port: 7071
+
+# Logging settings.
+logging:
+  # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
+  level: INFO
+  # Logger-specific levels.
+  loggers:
+  # Sets the level for 'com.example.app' to DEBUG.
+    com.fantasy.dropwizard: DEBUG
+

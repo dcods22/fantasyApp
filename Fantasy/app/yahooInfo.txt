@@ -1,0 +1,276 @@
+App IDMw5JFr32
+Consumer Keydj0yJmk9VzJjd3k1c2doY0ZYJmQ9WVdrOVRYYzFTa1p5TXpJbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD0zZg--
+Consumer Secret1827f2e4a2de32a60ac155dba17c0dc98777569c
+
+
+/** SignPostTest.java  **/
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
+
+import oauth.signpost.OAuthConsumer;
+import oauth.signpost.basic.DefaultOAuthConsumer;
+
+
+/**
+ * Sample code to use Yahoo Search BOSS
+ *
+ * Please include the following libraries
+ * 1. Apache Log4j
+ * 2. oAuth Signpost
+ *
+ * @author xyz
+ */
+public class SignPostTest {
+
+    private static final Logger log = Logger.getLogger(SignPostTest.class);
+
+    protected static String yahooServer = "https://yboss.yahooapis.com/ysearch/";
+
+    // Please provide your consumer key here
+    private static String consumer_key = "";
+
+    // Please provide your consumer secret here
+    private static String consumer_secret = "";
+
+    /** The HTTPS request object used for the connection */
+    private static StHttpRequest httpsRequest = new StHttpRequest();
+
+    /** Encode Format */
+    private static final String ENCODE_FORMAT = "UTF-8";
+
+    /** Call Type */
+    private static final String callType = "web";
+
+    private static final int HTTP_STATUS_OK = 200;
+
+    /**
+     *
+     * @return
+     */
+    public int returnHttpData()
+    throws UnsupportedEncodingException,
+    Exception{
+
+
+        if(this.isConsumerKeyExists() && this.isConsumerSecretExists()) {
+
+            // Start with call Type
+            String params = callType;
+
+            // Add query
+            params = params.concat("?q=");
+
+            // Encode Query string before concatenating
+            params = params.concat(URLEncoder.encode(this.getSearchString(), "UTF-8"));
+
+            // Create final URL
+            String url = yahooServer + params;
+
+            // Create oAuth Consumer
+            OAuthConsumer consumer = new DefaultOAuthConsumer(consumer_key, consumer_secret);
+
+            // Set the HTTPS request correctly
+            httpsRequest.setOAuthConsumer(consumer);
+
+            try {
+                log.info("sending get request to" + URLDecoder.decode(url, ENCODE_FORMAT));
+                int responseCode = httpsRequest.sendGetRequest(url);
+
+                // Send the request
+                if(responseCode == HTTP_STATUS_OK) {
+                    log.info("Response ");
+                } else {
+                    log.error("Error in response due to status code = " + responseCode);
+                }
+                log.info(httpsRequest.getResponseBody());
+
+            } catch(UnsupportedEncodingException e) {
+                log.error("Encoding/Decording error");
+            } catch (IOException e) {
+                log.error("Error with HTTP IO", e);
+            } catch (Exception e) {
+                log.error(httpsRequest.getResponseBody(), e);
+                return 0;
+            }
+
+        } else {
+            log.error("Key/Secret does not exist");
+        }
+        return 1;
+    }
+
+    private String getSearchString() {
+        return "Yahoo";
+    }
+
+    private boolean isConsumerKeyExists() {
+        if(consumer_key.isEmpty()) {
+            log.error("Consumer Key is missing. Please provide the key");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isConsumerSecretExists() {
+        if(consumer_secret.isEmpty()) {
+            log.error("Consumer Secret is missing. Please provide the key");
+            return false;
+        }
+        return true;
+    }
+    /**
+     * @param args
+     */
+    public static void main(String[] args) {
+
+        BasicConfigurator.configure();
+        try {
+            SignPostTest signPostTest = new SignPostTest();
+            signPostTest.returnHttpData();
+
+        } catch (Exception e) {
+            log.info("Error", e);
+        }
+    }
+}
+
+
+/** StHTTPRequest.java  **/
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpsURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.apache.log4j.Logger;
+
+import oauth.signpost.OAuthConsumer;
+import oauth.signpost.exception.OAuthCommunicationException;
+import oauth.signpost.exception.OAuthExpectationFailedException;
+import oauth.signpost.exception.OAuthMessageSignerException;
+
+
+/**
+ * @author David Hardtke
+ * @author xyz
+ * Simple HTTPS Request implementation
+ */
+public class StHttpRequest {
+
+    private static final Logger log = Logger.getLogger(StHttpRequest.class);
+
+    private String responseBody = "";
+
+    private OAuthConsumer consumer = null;
+
+    /** Default Constructor */
+    public StHttpRequest() { }
+
+    public StHttpRequest(OAuthConsumer consumer) {
+        this.consumer = consumer;
+    }
+
+    public HttpsURLConnection getConnection(String url)
+    throws IOException,
+        OAuthMessageSignerException,
+        OAuthExpectationFailedException,
+        OAuthCommunicationException
+    {
+        try {
+            URL u = new URL(url);
+
+            HttpsURLConnection uc = (HttpsURLConnection) u.openConnection();
+
+            if (consumer != null) {
+                try {
+                    log.info("Signing the oAuth consumer");
+                    consumer.sign(uc);
+                } catch (OAuthMessageSignerException e) {
+                    log.error("Error signing the consumer", e);
+                    throw e;
+                } catch (OAuthExpectationFailedException e) {
+                    log.error("Error signing the consumer", e);
+                    throw e;
+                } catch (OAuthCommunicationException e) {
+                    log.error("Error signing the consumer", e);
+                    throw e;
+                }
+                uc.connect();
+            }
+            return uc;
+        } catch (IOException e) {
+            log.error("Error signing the consumer", e);
+            throw e;
+        }
+    }
+
+    /**
+     * Sends an HTTP GET request to a url
+     *
+     * @param url the url
+     * @return - HTTP response code
+     */
+    public int sendGetRequest(String url)
+    throws IOException,
+    OAuthMessageSignerException,
+    OAuthExpectationFailedException,
+    OAuthCommunicationException {
+
+        int responseCode = 500;
+        try {
+            HttpsURLConnection uc = getConnection(url);
+
+            responseCode = uc.getResponseCode();
+            if(200 == responseCode || 401 == responseCode || 404 == responseCode){
+                BufferedReader rd = new BufferedReader(new InputStreamReader(responseCode==200?uc.getInputStream():uc.getErrorStream()));
+                StringBuffer sb = new StringBuffer();
+                String line;
+                while ((line = rd.readLine()) != null) {
+                    sb.append(line);
+                }
+                rd.close();
+                setResponseBody(sb.toString());
+            }
+        } catch (MalformedURLException ex) {
+            throw new IOException( url + " is not valid");
+        } catch (IOException ie) {
+            throw new IOException("IO Exception " + ie.getMessage());
+        }
+        return responseCode;
+    }
+
+
+    /**
+     * Return the Response body
+     * @return String
+     */
+    public String getResponseBody() {
+        return responseBody;
+    }
+
+    /**
+     * Setter
+     * @param responseBody
+     */
+    public void setResponseBody(String responseBody) {
+        if (null != responseBody) {
+            this.responseBody = responseBody;
+        }
+    }
+
+    /**
+     * Set the oAuth consumer
+     * @param consumer
+     */
+    public void setOAuthConsumer(OAuthConsumer consumer) {
+        this.consumer = consumer;
+    }
+}

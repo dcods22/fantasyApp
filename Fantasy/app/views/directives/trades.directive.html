@@ -1,0 +1,25 @@
+<uib-accordion close-others="oneAtATime">
+    <uib-accordion-group  ng-repeat="trade in trades" heading="{{trade.name}}">
+        <div class="row">
+            <div class="col-xs-6">
+                To: {{trade.to}}
+            </div>
+            <div class="col-xs-6">
+                From: {{trade.from}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                {{trade.details}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-2">
+                <h1 ng-click="voted('yes', trade.id)"><i class="text-success icon-action fa fa-2x" ng-class="{'fa-thumbs-up': trade.votedYes, 'fa-thumbs-o-up': !trade.votedYes}" ></i></h1>
+            </div>
+            <div class="col-xs-2">
+                <h1 ng-click="voted('no', trade.id)"><i class="text-danger icon-action fa fa-2x" ng-class="{'fa-thumbs-down': trade.votedNo, 'fa-thumbs-o-down': !trade.votedNo}"></i></h1>
+            </div>
+        </div>
+    </uib-accordion-group>
+</uib-accordion>

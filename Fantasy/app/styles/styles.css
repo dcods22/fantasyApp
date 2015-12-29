@@ -1,0 +1,29 @@
+.top-buffer-20 {
+    margin-top:20px;
+}
+
+.top-buffer-10 {
+    margin-top:10px;
+}
+
+.messageName {
+    font-weight: bold;
+}
+
+.received {
+    width:100%;
+    height:100%;
+    background-color: rgba(124, 156, 165, 0.4);
+    border-radius: 10px;
+}
+
+.sent {
+    width:100%;
+    height:100%;
+    background-color: rgba(15, 149, 255, 0.4);
+    border-radius: 10px;
+}
+
+.messageHolder {
+    padding: 5px 10px 5px 10px;
+}

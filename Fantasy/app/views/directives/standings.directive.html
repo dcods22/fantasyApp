@@ -1,0 +1,19 @@
+<h1>Standings</h1>
+
+<div ng-repeat="division in data.divisons">
+    <h3>{{division.name}}</h3>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <td>Team</td>
+                <td>Wins</td>
+                <td>Loses</td>
+            </tr>
+        </thead>
+        <tr ng-repeat="team in division.teams">
+            <td>{{team.name}}</td>
+            <td>{{team.wins}}</td>
+            <td>{{team.loses}}</td>
+        </tr>
+    </table>
+</div>
